@@ -4,6 +4,7 @@
 #include "interrupts.h"
 
 volatile struct motor motor;
+volatile struct analogs analogs;
 
 void setup() {
     
@@ -47,11 +48,6 @@ void setup() {
 void loop() {
 
     digitalWrite(DRV_IN1, HIGH);
-    motor.speed++;
     digitalWrite(DRV_IN2, LOW);
     //delay(1000);
-    Serial.print(motor.enk1_cnt);
-    Serial.println(motor.enk2_cnt);
-    // Serial.println(analogRead(BATT_V));
-    // Serial.println(analogRead(TEMP));
 }
