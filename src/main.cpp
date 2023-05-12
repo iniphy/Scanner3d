@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "defines.h"
 
+char speed = 0;
+
 void setup() {
     
     pinMode(BTN1 ,INPUT);
@@ -24,6 +26,7 @@ void setup() {
 
     Serial.begin(9600);
 
+    digitalWrite(nSLEEP, HIGH);
     digitalWrite(DECAY, LOW);
     digitalWrite(CURR_I2, LOW);
     digitalWrite(CURR_I3, LOW);
@@ -33,9 +36,11 @@ void setup() {
 
 void loop() {
 
-    analogWrite(DRV_IN1, 100);
+    
+    analogWrite(DRV_IN1, speed);
+    speed++;
     digitalWrite(DRV_IN2, HIGH);
-    delay(1000);
-    Serial.println(analogRead(BATT_V));
-    Serial.println(analogRead(TEMP));
+    delay(100);
+    //Serial.println(analogRead(BATT_V));
+    //Serial.println(analogRead(TEMP));
 }
