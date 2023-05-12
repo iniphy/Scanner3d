@@ -3,8 +3,8 @@
 #include "global_vars.h"
 #include "interrupts.h"
 
-uint8_t timer0_prescaler;
 uint8_t timer1_prescaler;
+uint8_t timer2_prescaler;
 
 ISR(INT0_vect) {
     motor.enk1_cnt++;
@@ -14,33 +14,14 @@ ISR(INT1_vect) {
     motor.enk2_cnt++;
 }
 
-ISR(TIMER0_COMPA_vect) {
-    if(timer0_prescaler < 9) //Freq 10Hz
-        timer0_prescaler++;
-    else {
-        timer0_prescaler = 0;
-        if(motor.enk1_cnt == motor.enk2_cnt)
-            motor.dir = UNDEF;
-        else if(motor.enk1_cnt > motor.enk2_cnt)
-            motor.dir = RIGHT;
-        else
-            motor.dir = LEFT;
-        
-        uint16_t turns_x10 = (max(motor.enk1_cnt, motor.enk2_cnt) * 10) / 14;
-        motor.turns_x10 += turns_x10; 
-        motor.freq = turns_x10; // 14 pulses for revolution, and 10 measurements per second
 
-        motor.enk1_cnt = 0;
-        motor.enk2_cnt = 0;
-    }
-}
 
 ISR(TIMER1_COMPA_vect) {
     if(timer1_prescaler < 59) //Freq 1Hz
         timer1_prescaler++;
     else {
         timer1_prescaler = 0;
-        Serial.print("Dir: ");
+        Serial.print("Dir:  ");
         if(motor.dir == RIGHT)
             Serial.print("RIGHT");
         else if(motor.dir == LEFT)
@@ -48,18 +29,41 @@ ISR(TIMER1_COMPA_vect) {
         else
             Serial.print("UNDEF");
 
-        Serial.print(" Freq: ");
+        Serial.print("\tFreq:  ");
         Serial.print(motor.freq);
-        Serial.print(" Turns: ");
+        Serial.print("\tTurns:  ");
         Serial.print(motor.turns_x10 / 10);
 
         analogs.batt_volt = (uint16_t)(analogRead(BATT_V) * 9) / 205; // 9 * 5V / 1024bit, VERY slow decay due to huge RC
         analogs.temp = (uint16_t)(analogRead(TEMP) * 135) / 205 - 172; // temp(u) = 135.415 * 5V / 1024bit * u - 171.872
 
-        Serial.print(" Batt: ");
+        Serial.print("\tBatt:  ");
         Serial.print(analogs.batt_volt);
-        Serial.print(" Temp: ");
+        Serial.print("\tTemp:  ");
         Serial.println(analogs.temp);
+    }
+}
+
+ISR(TIMER2_COMPA_vect) {
+    if(timer2_prescaler < 9) //Freq 10Hz
+        timer2_prescaler++;
+    else {
+        timer2_prescaler = 0;
+        
+        uint16_t turns_x10 = (max(motor.enk1_cnt, motor.enk2_cnt) * 10) / 14;
+        
+        if(motor.dir == RIGHT)
+            motor.turns_x10 += turns_x10;
+        else if(motor.dir == LEFT)
+            motor.turns_x10 -= turns_x10;
+        
+        motor.freq = turns_x10; // 14 pulses for revolution, and 10 measurements per second
+
+        motor.enk1_cnt = 0;
+        motor.enk2_cnt = 0;
+
+        if(motor.freq == 0)
+            motor.dir = UNDEF;
     }
 }
 
@@ -81,16 +85,7 @@ void int1_init(void) {
     motor.enk2_cnt = 0;
 }
 
-void timer0_init(void) {
 
-    TCCR0A = TCCR0B = TIMSK0 = 0; // Reset default Arduino configuration
-    OCR0A = 38; // Value for freq = 100Hz
-    TCCR0A |= (1 << WGM01); // CTC mode
-    TCCR0B |= (1 << CS02) | (1 << CS00); // Prescaler
-    TIMSK0 |= (1 << OCIE0A); // Enable Compare match
-
-    timer0_prescaler = 0;
-}
 
 void timer1_init(void) {
     
@@ -101,4 +96,15 @@ void timer1_init(void) {
     TIMSK1 |= (1 << OCIE1A); // Enable Compare match
 
     timer1_prescaler = 0;
+}
+
+void timer2_init(void) {
+
+    TCCR2A = TCCR2B = TIMSK2 = 0; // Reset default Arduino configuration
+    OCR2A = 38; // Value for freq = 100Hz
+    TCCR2A |= (1 << WGM01); // CTC mode
+    TCCR2B |= (1 << CS22) | (1 << CS21) | (1 << CS20); // Prescaler
+    TIMSK2 |= (1 << OCIE2A); // Enable Compare match
+
+    timer2_prescaler = 0;
 }

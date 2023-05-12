@@ -2,12 +2,16 @@
 #include "defines.h"
 #include "global_vars.h"
 #include "interrupts.h"
+#include "control.h"
 
 volatile struct motor motor;
 volatile struct analogs analogs;
 
 void setup() {
     
+    Serial.begin(9600);
+    Serial.println("Communication init baudrate 9600");
+
     pinMode(BTN1 ,INPUT);
     pinMode(BTN2 ,INPUT);
     pinMode(EXP_INT ,INPUT);
@@ -26,29 +30,35 @@ void setup() {
 
     pinMode(BATT_V ,INPUT);
     pinMode(TEMP ,INPUT);
-
-    Serial.begin(9600);
-    Serial.println("Communication init baudrate 9600");
-
-    digitalWrite(nSLEEP, HIGH);
-    digitalWrite(DECAY, LOW);
-    digitalWrite(CURR_I2, LOW);
-    digitalWrite(CURR_I3, LOW);
-    digitalWrite(CURR_I4, HIGH);
-    digitalWrite(WDO, LOW);
-    
     pinMode(SPARE, OUTPUT);
+
+    digitalWrite(WDO, HIGH);
+
     
     cli();
     int0_init();
     int1_init();
-    timer0_init();
     timer1_init();
+    timer2_init();
     sei();
-
-    digitalWrite(DRV_IN1, HIGH);
-    digitalWrite(DRV_IN2, LOW);
+    init_motor(LIMIT77, SLOW);
 }
 
 void loop() {
+    for(int i = 20; i <= 100; i++) {
+        set_motor_speed(i, RIGHT);
+        delay(50);
+    }
+    for(int i = 100; i >= 20; i--) {
+        set_motor_speed(i, RIGHT);
+        delay(50);
+    }
+    for(int i = 20; i <= 100; i++) {
+        set_motor_speed(i, LEFT);
+        delay(50);
+    }
+    for(int i = 100; i >= 20; i--) {
+        set_motor_speed(i, LEFT);
+        delay(50);
+    }
 }
