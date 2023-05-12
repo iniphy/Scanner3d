@@ -1,7 +1,19 @@
 #include <Arduino.h>
 #include "defines.h"
+#include "globals.h"
+#include "init.h"
 
-char speed = 0;
+ISR(INT0_vect) {
+    enk1_cnt++;
+}
+
+ISR(INT1_vect) {
+    enk2_cnt++;
+}
+
+uint8_t motor_speed = 0;
+volatile uint16_t enk1_cnt;
+volatile uint16_t enk2_cnt;
 
 void setup() {
     
@@ -32,13 +44,14 @@ void setup() {
     digitalWrite(CURR_I3, LOW);
     digitalWrite(CURR_I4, HIGH);
 
+    interrupts_init();
+    sei();
 }
 
 void loop() {
 
-    
-    analogWrite(DRV_IN1, speed);
-    speed++;
+    analogWrite(DRV_IN1, motor_speed);
+    motor_speed++;
     digitalWrite(DRV_IN2, HIGH);
     delay(100);
     //Serial.println(analogRead(BATT_V));
