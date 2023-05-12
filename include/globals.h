@@ -3,11 +3,18 @@
 
 #include <stdint.h>
 
-extern uint8_t motor_speed;
-extern volatile uint16_t enk1_cnt;
-extern volatile uint16_t enk2_cnt;
-volatile struct flags {
-    char int0;
+enum dir {
+    RIGHT,
+    LEFT,
+    UNDEF
 };
+struct motor{
+    uint8_t speed;
+    uint16_t turns;
+    enum dir dir; 
+    uint16_t enk1_cnt;
+    uint16_t enk2_cnt;
+};
+extern volatile struct motor motor;
 
 #endif

@@ -2,18 +2,9 @@
 #include "defines.h"
 #include "globals.h"
 #include "init.h"
+#include "interrupts.h"
 
-ISR(INT0_vect) {
-    enk1_cnt++;
-}
-
-ISR(INT1_vect) {
-    enk2_cnt++;
-}
-
-uint8_t motor_speed = 0;
-volatile uint16_t enk1_cnt;
-volatile uint16_t enk2_cnt;
+volatile struct motor motor;
 
 void setup() {
     
@@ -44,16 +35,17 @@ void setup() {
     digitalWrite(CURR_I3, LOW);
     digitalWrite(CURR_I4, HIGH);
 
-    interrupts_init();
+    pinInterrupts_init();
+    timers_init();
     sei();
 }
 
 void loop() {
 
-    analogWrite(DRV_IN1, motor_speed);
-    motor_speed++;
+    digitalWrite(DRV_IN1, LOW);
+    motor.speed++;
     digitalWrite(DRV_IN2, HIGH);
     delay(100);
-    //Serial.println(analogRead(BATT_V));
-    //Serial.println(analogRead(TEMP));
+    // Serial.println(analogRead(BATT_V));
+    // Serial.println(analogRead(TEMP));
 }
