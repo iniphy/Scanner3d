@@ -1,5 +1,5 @@
-#ifndef GLOBALS_H
-#define GLOBALS_H
+#ifndef GLOBAL_VARS_H
+#define GLOBALS_VARS_H
 
 #include <stdint.h>
 
