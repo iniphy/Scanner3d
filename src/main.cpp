@@ -37,17 +37,18 @@ void setup() {
     digitalWrite(CURR_I4, HIGH);
     digitalWrite(WDO, LOW);
     
+    pinMode(SPARE, OUTPUT);
+    
     cli();
     int0_init();
     int1_init();
     timer0_init();
     timer1_init();
     sei();
-}
-
-void loop() {
 
     digitalWrite(DRV_IN1, HIGH);
     digitalWrite(DRV_IN2, LOW);
-    //delay(1000);
+}
+
+void loop() {
 }

@@ -23,4 +23,7 @@
 #define BATT_V A0
 #define TEMP A1
 
+//Spare IO
+#define SPARE 8
+
 #endif

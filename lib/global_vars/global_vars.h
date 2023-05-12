@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+
+
 enum dir {
     RIGHT,
     LEFT,
@@ -10,7 +12,7 @@ enum dir {
 };
 struct motor{
     uint16_t freq;
-    uint16_t turns;
+    uint16_t turns_x10;
     enum dir dir; 
     uint16_t enk1_cnt;
     uint16_t enk2_cnt;
