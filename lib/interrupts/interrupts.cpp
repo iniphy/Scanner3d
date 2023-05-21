@@ -57,9 +57,7 @@ ISR(TIMER1_COMPA_vect) {
         else
             analogs.val_to_leds = 0b00000000;
 
-        // Wire.beginTransmission(0x39);
-        // Wire.write(analogs.val_to_leds);
-        // Wire.endTransmission();
+            
         }
 }
 

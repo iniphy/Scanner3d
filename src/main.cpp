@@ -30,22 +30,27 @@ void loop() {
     for(int i = 20; i <= 100; i++) {
         set_motor_speed(i, RIGHT);
         delay(20);
+        expander.write8(analogs.val_to_leds);
     }
 
     for(int i = 100; i >= 20; i--) {
         set_motor_speed(i, RIGHT);
         delay(20);
+        expander.write8(analogs.val_to_leds);
     }
 
     for(int i = 20; i <= 100; i++) {
         set_motor_speed(i, LEFT);
         delay(20);
+        expander.write8(analogs.val_to_leds);
     }
 
     for(int i = 100; i >= 20; i--) {
         set_motor_speed(i, LEFT);
         delay(20);
+        expander.write8(analogs.val_to_leds);
     }
-    expander.write8(analogs.val_to_leds);
+    
 
 }
+
