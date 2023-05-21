@@ -2,6 +2,8 @@
 #define GLOBALS_VARS_H
 
 #include <stdint.h>
+#include "PCF8574.h"
+
 #pragma once
 enum motor_curr_limit {
     LIMIT29,
@@ -37,6 +39,7 @@ extern volatile struct motor motor;
 struct analogs {
     uint16_t temp;
     uint16_t batt_volt;
+    uint8_t val_to_leds;
 };
 extern volatile struct analogs analogs;
 

@@ -26,4 +26,13 @@
 //Spare IO
 #define SPARE 8
 
+
+// LED tresholds
+#define TRSH1 29
+#define TRSH2 30
+#define TRSH3 31
+#define TRSH4 32
+
+void init_GPIO(void);
+
 #endif
