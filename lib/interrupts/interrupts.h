@@ -10,7 +10,7 @@ ISR(TIMER2_COMPA_vect); // timer witch calls an interrupt each 1s
 
 void int0_init(void);
 void int1_init(void);
-void timer1_init(PCF8574* _expander);
+void timer1_init(void);
 void timer2_init(void);
 
 #endif

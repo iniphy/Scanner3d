@@ -20,7 +20,7 @@ void setup() {
     cli();
     int0_init();
     int1_init();
-    timer1_init(&expander);
+    timer1_init();
     timer2_init();
     sei();
     init_motor(LIMIT77, SLOW);
@@ -46,6 +46,6 @@ void loop() {
         set_motor_speed(i, LEFT);
         delay(20);
     }
-    
+    expander.write8(analogs.val_to_leds);
 
 }

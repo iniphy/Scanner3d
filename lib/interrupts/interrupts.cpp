@@ -6,8 +6,6 @@
 uint8_t timer1_prescaler;
 uint8_t timer2_prescaler;
 uint8_t val_to_compare;
-PCF8574* expander_ptr;
-
 
 ISR(INT0_vect) {
     motor.enk1_cnt++;
@@ -62,8 +60,7 @@ ISR(TIMER1_COMPA_vect) {
         // Wire.beginTransmission(0x39);
         // Wire.write(analogs.val_to_leds);
         // Wire.endTransmission();
-        // expander_ptr->write8(analogs.val_to_leds);
-    }
+        }
 }
 
 ISR(TIMER2_COMPA_vect) {
@@ -109,7 +106,7 @@ void int1_init(void) {
 
 
 
-void timer1_init(PCF8574* _expander) {
+void timer1_init(void) {
     
     TCCR1B = TIMSK1 = 0; // Reset default Arduino configuration
     OCR1A = 255;//5624; // Value for freq
@@ -118,7 +115,6 @@ void timer1_init(PCF8574* _expander) {
     TIMSK1 |= (1 << OCIE1A); // Enable Compare match
 
     timer1_prescaler = 0;
-    expander_ptr = _expander;
 }
 
 void timer2_init(void) {
