@@ -57,8 +57,7 @@ ISR(TIMER1_COMPA_vect) {
         else
             analogs.val_to_leds = 0b00000000;
 
-            
-        }
+    }
 }
 
 ISR(TIMER2_COMPA_vect) {
@@ -81,6 +80,8 @@ ISR(TIMER2_COMPA_vect) {
 
         if(motor.freq == 0)
             motor.dir = UNDEF;
+        
+        digitalWrite(WDO, !digitalRead(WDO)); // Reset Watchdog timer
     }
 }
 
