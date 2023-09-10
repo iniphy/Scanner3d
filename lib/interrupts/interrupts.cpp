@@ -22,26 +22,27 @@ ISR(TIMER1_COMPA_vect) {
         timer1_prescaler++;
     else {
         timer1_prescaler = 0;
-        Serial.print("Dir:  ");
-        if(motor.dir == RIGHT)
-            Serial.print("RIGHT");
-        else if(motor.dir == LEFT)
-            Serial.print("LEFT");
-        else
-            Serial.print("UNDEF");
-
-        Serial.print("\tFreq:  ");
-        Serial.print(motor.freq);
-        Serial.print("\tTurns:  ");
-        Serial.print(motor.turns_x10 / 10);
+        // TODO: for the moment this communication (monitoring) is not handled in the PhysioServer
+        //     : thus, we need to turned it off as it disrupt the normal communication otherwise 
+        // Serial.print("Dir:  ");
+        // if(motor.dir == RIGHT)
+        //     Serial.print("RIGHT");
+        // else if(motor.dir == LEFT)
+        //     Serial.print("LEFT");
+        // else
+        //     Serial.print("UNDEF");
+        // Serial.print("\tFreq:  ");
+        // Serial.print(motor.freq);
+        // Serial.print("\tTurns:  ");
+        // Serial.print(motor.turns_x10 / 10);
 
         analogs.batt_volt = (uint16_t)(analogRead(BATT_V) * 9) / 205; // 9 * 5V / 1024bit, VERY slow decay due to huge RC
         analogs.temp = (uint16_t)(analogRead(TEMP) * 135) / 205 - 172; // temp(u) = 135.415 * 5V / 1024bit * u - 171.872
 
-        Serial.print("\tBatt:  ");
-        Serial.print(analogs.batt_volt);
-        Serial.print("\tTemp:  ");
-        Serial.println(analogs.temp);
+        // Serial.print("\tBatt:  ");
+        // Serial.print(analogs.batt_volt);
+        // Serial.print("\tTemp:  ");
+        // Serial.println(analogs.temp);
 
         val_to_compare = analogs.temp;
         if(val_to_compare <= TRSH1)
