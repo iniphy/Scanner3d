@@ -14,12 +14,19 @@ int predkosc_pocz;
 int czas;
 int droga;
 int dystans;
+unsigned long Time_start;
+unsigned long Time_current;
+unsigned long Time_diff;
+unsigned long t_limit;
 byte command = 0;
+byte stan = 0;
 const byte CHECK_IF_READY_TO_WORK = 5;
 const byte SCAN_START = 20;
 const byte SCAN_STOP = 21;
 const byte RESPONSE_OK = 30;
 const byte RESPONSE_ERROR = 31;
+const byte SCANNING = 1;
+const byte NOT_SCANNING = 2;
 
 void send_command(byte cmd) {
     Serial.write(cmd);
@@ -49,6 +56,7 @@ void setup()
   predkosc_max = 80;
   droga = motor.turns_x10;
   dystans = 530;
+  t_limit = 10000; // timeout na skanerze
 }
 
 void loop()
@@ -61,6 +69,8 @@ void loop()
       send_command(RESPONSE_OK);
       delay(100);
       // Serial.println("OK");
+      Time_start = millis();
+      stan = SCANNING;
       for (int i = 20; i <= predkosc_max; i++)
       {
         set_motor_speed(i, RIGHT); // max speed set_motor_speed(100, RIGHT)
@@ -72,7 +82,13 @@ void loop()
     }
     
   }
-  if (motor.turns_x10 / 10 > dystans)
+  if (stan == SCANNING)
+  {
+    Time_current = millis();
+    Time_diff = Time_current - Time_start;
+  }
+
+  if ((motor.turns_x10 / 10 > dystans) || ( Time_diff>t_limit))
   {
     // Serial.println("Wystarczy");
     for (int i = predkosc_max; i >= 0; i--)
@@ -82,6 +98,10 @@ void loop()
       expander.write8(analogs.val_to_leds);
     }
     send_command(SCAN_STOP);
+    stan = NOT_SCANNING;
+    Time_diff = 0;
+    Time_current = 0;
+    Time_start = 0;
     deinit_motor();
     init_motor(LIMIT77, SLOW);
   }
