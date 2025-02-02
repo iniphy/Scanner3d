@@ -25,12 +25,23 @@ const byte SCAN_START = 20;
 const byte SCAN_STOP = 21;
 const byte RESPONSE_OK = 30;
 const byte RESPONSE_ERROR = 31;
+const byte MEASURE_BATTERY = 41;
 const byte SCANNING = 1;
 const byte NOT_SCANNING = 2;
 
 void send_command(byte cmd) {
     Serial.write(cmd);
     Serial.flush();
+}
+
+void send_float(float value) {
+  union cvt {
+    float val;
+    unsigned char b[4];
+  } x;
+  x.val= value;
+  Serial.write(x.b, 4);
+  Serial.flush();
 }
 
 void setup()
@@ -64,7 +75,12 @@ void loop()
   if (Serial.available() > 0)
   {
     command = Serial.read();
-    if (command == SCAN_START)
+    if (command == MEASURE_BATTERY) {
+      // TODO: here read the real value!
+      float battery_voltage = 15.0;
+      send_float(battery_voltage);
+    }
+    else if (command == SCAN_START)
     {
       send_command(RESPONSE_OK);
       delay(100);
