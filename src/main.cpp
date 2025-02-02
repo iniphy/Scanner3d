@@ -14,6 +14,7 @@ int predkosc_pocz;
 int czas;
 int droga;
 int dystans;
+int adc;
 unsigned long Time_start;
 unsigned long Time_current;
 unsigned long Time_diff;
@@ -76,8 +77,8 @@ void loop()
   {
     command = Serial.read();
     if (command == MEASURE_BATTERY) {
-      // TODO: here read the real value!
-      float battery_voltage = 15.0;
+      adc = analogRead(A0);
+      float battery_voltage = float(adc) * 5.0 / 1024.0 * 8.02;
       send_float(battery_voltage);
     }
     else if (command == SCAN_START)
