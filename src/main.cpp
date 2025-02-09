@@ -14,6 +14,7 @@ int predkosc_pocz;
 int czas;
 int droga;
 int dystans;
+int adc;
 unsigned long Time_start;
 unsigned long Time_current;
 unsigned long Time_diff;
@@ -25,12 +26,23 @@ const byte SCAN_START = 20;
 const byte SCAN_STOP = 21;
 const byte RESPONSE_OK = 30;
 const byte RESPONSE_ERROR = 31;
+const byte MEASURE_BATTERY = 41;
 const byte SCANNING = 1;
 const byte NOT_SCANNING = 2;
 
 void send_command(byte cmd) {
     Serial.write(cmd);
     Serial.flush();
+}
+
+void send_float(float value) {
+  union cvt {
+    float val;
+    unsigned char b[4];
+  } x;
+  x.val= value;
+  Serial.write(x.b, 4);
+  Serial.flush();
 }
 
 void setup()
@@ -64,7 +76,13 @@ void loop()
   if (Serial.available() > 0)
   {
     command = Serial.read();
-    if (command == SCAN_START)
+    if (command == MEASURE_BATTERY) {
+      send_command(RESPONSE_OK);
+      adc = analogRead(A0);
+      float battery_voltage = float(adc) * 5.0 / 1024.0 * 8.02;
+      send_float(battery_voltage);
+    }
+    else if (command == SCAN_START)
     {
       send_command(RESPONSE_OK);
       delay(100);
