@@ -77,6 +77,7 @@ void loop()
   {
     command = Serial.read();
     if (command == MEASURE_BATTERY) {
+      send_command(RESPONSE_OK);
       adc = analogRead(A0);
       float battery_voltage = float(adc) * 5.0 / 1024.0 * 8.02;
       send_float(battery_voltage);
