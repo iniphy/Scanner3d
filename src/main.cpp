@@ -67,7 +67,7 @@ void setup()
   predkosc_pocz = 30;
   predkosc_max = 80;
   droga = motor.turns_x10;
-  dystans = 530;
+  dystans = 22000;
   t_limit = 10000; // timeout na skanerze
 }
 
@@ -86,9 +86,10 @@ void loop()
     {
       send_command(RESPONSE_OK);
       delay(100);
-      // Serial.println("OK");
       Time_start = millis();
       stan = SCANNING;
+      motor.enk1_cnt = 0;
+      motor.enk2_cnt = 0;
       for (int i = 20; i <= predkosc_max; i++)
       {
         set_motor_speed(i, RIGHT); // max speed set_motor_speed(100, RIGHT)
@@ -104,23 +105,24 @@ void loop()
   {
     Time_current = millis();
     Time_diff = Time_current - Time_start;
-  }
 
-  if ((motor.turns_x10 / 10 > dystans) || ( Time_diff>t_limit))
-  {
-    // Serial.println("Wystarczy");
-    for (int i = predkosc_max; i >= 0; i--)
+    if (((motor.enk1_cnt + motor.enk2_cnt) > dystans) || ( Time_diff>t_limit))
     {
-      set_motor_speed(i, RIGHT);
-      delay(20);
-      expander.write8(analogs.val_to_leds);
+      for (int i = predkosc_max; i >= 0; i--)
+      {
+        set_motor_speed(i, RIGHT);
+        delay(20);
+        expander.write8(analogs.val_to_leds);
+      }
+      motor.enk1_cnt = 0;
+      motor.enk2_cnt = 0;
+      send_command(SCAN_STOP);
+      stan = NOT_SCANNING;
+      Time_diff = 0;
+      Time_current = 0;
+      Time_start = 0;
+      deinit_motor();
+      init_motor(LIMIT77, SLOW);
     }
-    send_command(SCAN_STOP);
-    stan = NOT_SCANNING;
-    Time_diff = 0;
-    Time_current = 0;
-    Time_start = 0;
-    deinit_motor();
-    init_motor(LIMIT77, SLOW);
   }
 }

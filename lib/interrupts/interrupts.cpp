@@ -22,19 +22,18 @@ ISR(TIMER1_COMPA_vect) {
         timer1_prescaler++;
     else {
         timer1_prescaler = 0;
-        // TODO: for the moment this communication (monitoring) is not handled in the PhysioServer
-        //     : thus, we need to turned it off as it disrupt the normal communication otherwise 
-        // Serial.print("Dir:  ");
+        //.print("Dir:  ");
         // if(motor.dir == RIGHT)
-        //     Serial.print("RIGHT");
+            //Serial.print("RIGHT");
         // else if(motor.dir == LEFT)
-        //     Serial.print("LEFT");
+            //Serial.print("LEFT");
         // else
-        //     Serial.print("UNDEF");
-        // Serial.print("\tFreq:  ");
-        // Serial.print(motor.freq);
-        // Serial.print("\tTurns:  ");
-        // Serial.print(motor.turns_x10 / 10);
+            //Serial.print("UNDEF");
+
+        //Serial.print("\tFreq:  ");
+        //Serial.print(motor.freq);
+        //Serial.print("\tTurns:  ");
+        //Serial.print(motor.turns_x10 / 10);
 
         analogs.batt_volt = (uint16_t)(analogRead(BATT_V) * 9) / 205; // 9 * 5V / 1024bit, VERY slow decay due to huge RC
         analogs.temp = (uint16_t)(analogRead(TEMP) * 135) / 205 - 172; // temp(u) = 135.415 * 5V / 1024bit * u - 171.872
@@ -67,17 +66,19 @@ ISR(TIMER2_COMPA_vect) {
     else {
         timer2_prescaler = 0;
         
-        uint16_t turns_x10 = (max(motor.enk1_cnt, motor.enk2_cnt) * 10) / 14;
+        // uint16_t turns_x10 = (max(motor.enk1_cnt, motor.enk2_cnt) * 10) / 14;
         
-        if(motor.dir == RIGHT)
-            motor.turns_x10 += turns_x10;
-        else if(motor.dir == LEFT)
-            motor.turns_x10 -= turns_x10;
-        
-        motor.freq = turns_x10; // 14 pulses for revolution, and 10 measurements per second
+        // if(motor.dir == RIGHT)
+        //     motor.turns_x10 += turns_x10;
+        // else if(motor.dir == LEFT)
+        //     motor.turns_x10 -= turns_x10;
 
-        motor.enk1_cnt = 0;
-        motor.enk2_cnt = 0;
+        // motor.turns_x10 = ;
+        
+        // motor.freq = turns_x10; // 14 pulses for revolution, and 10 measurements per second
+
+        // motor.enk1_cnt = 0;
+        // motor.enk2_cnt = 0;
 
         if(motor.freq == 0)
             motor.dir = UNDEF;
