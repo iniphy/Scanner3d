@@ -1,9 +1,9 @@
-#include <Arduino.h>
 #include "PCF8574.h"
+#include "control.h"
 #include "defines.h"
 #include "global_vars.h"
 #include "interrupts.h"
-#include "control.h"
+#include <Arduino.h>
 
 volatile struct motor motor;
 volatile struct analogs analogs;
@@ -31,8 +31,8 @@ const byte SCANNING = 1;
 const byte NOT_SCANNING = 2;
 
 void send_command(byte cmd) {
-    Serial.write(cmd);
-    Serial.flush();
+  Serial.write(cmd);
+  Serial.flush();
 }
 
 void send_float(float value) {
@@ -40,17 +40,17 @@ void send_float(float value) {
     float val;
     unsigned char b[4];
   } x;
-  x.val= value;
+  x.val = value;
   Serial.write(x.b, 4);
   Serial.flush();
 }
 
-void setup()
-{
-
+void setup() {
   Serial.begin(9600);
-  // TODO: here, we have messages which are not handled on PhysioServer-side, thus, we need to supress them for the moment.
-  // Serial.println("Communication init baudrate 9600");
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB
+      // https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
+  }
 
   init_GPIO();
   expander.begin(0);
@@ -71,45 +71,14 @@ void setup()
   t_limit = 10000; // timeout na skanerze
 }
 
-void loop()
-{
-  if (Serial.available() > 0)
-  {
-    command = Serial.read();
-    if (command == MEASURE_BATTERY) {
-      send_command(RESPONSE_OK);
-      adc = analogRead(A0);
-      float battery_voltage = float(adc) * 5.0 / 1024.0 * 8.02;
-      send_float(battery_voltage);
-    }
-    else if (command == SCAN_START)
-    {
-      send_command(RESPONSE_OK);
-      delay(100);
-      Time_start = millis();
-      stan = SCANNING;
-      motor.enk1_cnt = 0;
-      motor.enk2_cnt = 0;
-      for (int i = 20; i <= predkosc_max; i++)
-      {
-        set_motor_speed(i, RIGHT); // max speed set_motor_speed(100, RIGHT)
-        delay(20);
-      }
-    } else if (command == CHECK_IF_READY_TO_WORK)
-    {
-      send_command(RESPONSE_OK);
-    }
-    
-  }
-  if (stan == SCANNING)
-  {
+void loop() {
+  // Performing scanning exludes any communication
+  if (stan == SCANNING) {
     Time_current = millis();
     Time_diff = Time_current - Time_start;
 
-    if (((motor.enk1_cnt + motor.enk2_cnt) > dystans) || ( Time_diff>t_limit))
-    {
-      for (int i = predkosc_max; i >= 0; i--)
-      {
+    if (motor.enk1_cnt + motor.enk2_cnt >= dystans || Time_diff >= t_limit) {
+      for (int i = predkosc_max; i >= 0; i--) {
         set_motor_speed(i, RIGHT);
         delay(20);
         expander.write8(analogs.val_to_leds);
@@ -123,6 +92,27 @@ void loop()
       Time_start = 0;
       deinit_motor();
       init_motor(LIMIT77, SLOW);
+    }
+  } else if (Serial.available() > 0) {
+    command = Serial.read();
+    if (command == CHECK_IF_READY_TO_WORK) {
+      send_command(RESPONSE_OK);
+    } else if (command == MEASURE_BATTERY) {
+      send_command(RESPONSE_OK);
+      adc = analogRead(A0);
+      float battery_voltage = float(adc) * 5.0 / 1024.0 * 8.02;
+      send_float(battery_voltage);
+    } else if (command == SCAN_START) {
+      send_command(RESPONSE_OK);
+      delay(100);
+      Time_start = millis();
+      stan = SCANNING;
+      motor.enk1_cnt = 0;
+      motor.enk2_cnt = 0;
+      for (int i = 20; i <= predkosc_max; i++) {
+        set_motor_speed(i, RIGHT); // max speed set_motor_speed(100, RIGHT)
+        delay(20);
+      }
     }
   }
 }
