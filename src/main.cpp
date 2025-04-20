@@ -30,7 +30,7 @@ const byte MEASURE_BATTERY = 41;
 const byte SCANNING = 1;
 const byte NOT_SCANNING = 2;
 
-void send_command(byte cmd) {
+void send_response(byte cmd) {
   Serial.write(cmd);
   Serial.flush();
 }
@@ -78,6 +78,7 @@ void loop() {
     Time_diff = Time_current - Time_start;
 
     if (motor.enk1_cnt + motor.enk2_cnt >= dystans || Time_diff >= t_limit) {
+      // Deccelerate the motor!
       for (int i = predkosc_max; i >= 0; i--) {
         set_motor_speed(i, RIGHT);
         delay(20);
@@ -85,30 +86,39 @@ void loop() {
       }
       motor.enk1_cnt = 0;
       motor.enk2_cnt = 0;
-      send_command(SCAN_STOP);
-      stan = NOT_SCANNING;
+      // send_response(SCAN_STOP);
       Time_diff = 0;
       Time_current = 0;
       Time_start = 0;
       deinit_motor();
       init_motor(LIMIT77, SLOW);
+      stan = NOT_SCANNING;
     }
   } else if (Serial.available() > 0) {
     command = Serial.read();
     if (command == CHECK_IF_READY_TO_WORK) {
-      send_command(RESPONSE_OK);
+      if (stan == NOT_SCANNING) {
+        send_response(RESPONSE_OK);
+      } else {
+        send_response(RESPONSE_ERROR);
+      }
     } else if (command == MEASURE_BATTERY) {
-      send_command(RESPONSE_OK);
       adc = analogRead(A0);
       float battery_voltage = float(adc) * 5.0 / 1024.0 * 8.02;
-      send_float(battery_voltage);
+      if (battery_voltage >= 0.0 and battery_voltage <= 50.0) {
+        send_response(RESPONSE_OK);
+        send_float(battery_voltage);
+      } else {
+        send_response(RESPONSE_ERROR);
+      }
     } else if (command == SCAN_START) {
-      send_command(RESPONSE_OK);
+      stan = SCANNING;
+      send_response(RESPONSE_OK);
       delay(100);
       Time_start = millis();
-      stan = SCANNING;
       motor.enk1_cnt = 0;
       motor.enk2_cnt = 0;
+      // Accelerate the motor!
       for (int i = 20; i <= predkosc_max; i++) {
         set_motor_speed(i, RIGHT); // max speed set_motor_speed(100, RIGHT)
         delay(20);
