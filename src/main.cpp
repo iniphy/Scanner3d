@@ -20,7 +20,6 @@ unsigned long Time_current;
 unsigned long Time_diff;
 unsigned long t_limit;
 byte command = 0;
-byte stan = 0;
 const byte CHECK_IF_READY_TO_WORK = 5;
 const byte SCAN_START = 20;
 const byte SCAN_STOP = 21;
@@ -29,6 +28,7 @@ const byte RESPONSE_ERROR = 31;
 const byte MEASURE_BATTERY = 41;
 const byte SCANNING = 1;
 const byte NOT_SCANNING = 2;
+byte stan = NOT_SCANNING;
 
 void send_response(byte cmd) {
   Serial.write(cmd);
