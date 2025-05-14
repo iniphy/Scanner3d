@@ -51,6 +51,7 @@ void setup() {
     ; // wait for serial port to connect. Needed for native USB
       // https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
   }
+  send_response(RESPONSE_OK);
 
   init_GPIO();
   expander.begin(0);
@@ -94,24 +95,32 @@ void loop() {
       init_motor(LIMIT77, SLOW);
       stan = NOT_SCANNING;
     }
-  } else if (Serial.available() > 0) {
+  }
+  // Allow communcation even if Arduino is in the scanning mode
+  if (Serial.available() > 0) {
     command = Serial.read();
-    if (command == CHECK_IF_READY_TO_WORK) {
-      if (stan == NOT_SCANNING) {
-        send_response(RESPONSE_OK);
-      } else {
-        send_response(RESPONSE_ERROR);
-      }
-    } else if (command == MEASURE_BATTERY) {
+    // Arduino is not ready when there is an ongoing scanning
+    if (command == CHECK_IF_READY_TO_WORK && stan == SCANNING) {
+      send_response(RESPONSE_ERROR);
+    } else if (command == CHECK_IF_READY_TO_WORK && stan == NOT_SCANNING) {
+      send_response(RESPONSE_OK);
+    }
+    // Can't measure battery while scanning
+    else if (command == MEASURE_BATTERY && stan == SCANNING) {
+      send_response(RESPONSE_ERROR);
+    } else if (command == MEASURE_BATTERY && stan == NOT_SCANNING) {
       adc = analogRead(A0);
       float battery_voltage = float(adc) * 5.0 / 1024.0 * 8.02;
-      if (battery_voltage >= 0.0 and battery_voltage <= 50.0) {
+      // Return OK only on valid voltage reading
+      if (battery_voltage >= 0.0 && battery_voltage <= 50.0) {
         send_response(RESPONSE_OK);
         send_float(battery_voltage);
       } else {
         send_response(RESPONSE_ERROR);
       }
-    } else if (command == SCAN_START) {
+    } else if (command == SCAN_START && stan == SCANNING) {
+      send_response(RESPONSE_ERROR);
+    } else if (command == SCAN_START && stan == NOT_SCANNING) {
       stan = SCANNING;
       send_response(RESPONSE_OK);
       delay(100);
@@ -123,6 +132,10 @@ void loop() {
         set_motor_speed(i, RIGHT); // max speed set_motor_speed(100, RIGHT)
         delay(20);
       }
+    }
+    // Send error on unrecognized command
+    else {
+      send_response(RESPONSE_ERROR);
     }
   }
 }
